@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e75395c9-e204-4124-863c-e71758fb2192" name="Default Changelist" comment="" />
+    <list default="true" id="e75395c9-e204-4124-863c-e71758fb2192" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reservation_system/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/reservation_system/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reservation_system/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/reservation_system/views.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -15,7 +21,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/Django-warsztaty" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1u2EZFUtHSq0pRwonhcfwFtoL8O" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -29,7 +35,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -48,7 +54,7 @@
       <option name="presentableId" value="Default" />
       <updated>1623855338493</updated>
       <workItem from="1623855340069" duration="4989000" />
-      <workItem from="1623860490240" duration="22493000" />
+      <workItem from="1623860490240" duration="30935000" />
     </task>
     <servers />
   </component>
@@ -65,5 +71,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/Django-warsztaty" />
+    </ignored-roots>
   </component>
 </project>

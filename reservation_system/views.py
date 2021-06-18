@@ -60,19 +60,20 @@ class AddRoom(View):
 class AllRooms(View):
     def get(self, request):
         rooms = Rooms.objects.all()
-        # filter(available=True)
-        print(rooms.count())
         all_rooms = HttpResponse("""
         <table><tr>
         <th>Room</th><th>Capacity</th><th>Available</th><th>Projector</th><th></th><th></th><th></th></tr>
         """)
         for room in rooms:
             all_rooms.write(
-                f'<tr><td><a href="/room/{room.id}/">{room.name}</a></td> \
-                <td>{room.capacity}</td><td>room.available</td><td>{room.projector}</td> \
-                <td><a href="/room/modify/{room.id}"><button type="submit" name="edit" value="{room.id}">Edit</button></a></td> \
-                <td><a href="/room/delete/{room.id}"><button type="submit" name="delete" value="{room.id}">Delete</button></a></td> \
-                <td><a href="/room/reserve/{room.id}"><button type="submit" name="book" value="{room.id}">Book</button></a></td></tr>')
+                f"""<tr><td><a href="/room/{room.id}">{room.name}</a></td>
+                <td>{room.capacity}</td>
+                <td>{"No" if room.booking_set.filter(date=date.today()) else "Yes"}</td>
+                <td>{room.projector}</td>
+                <td><a href="/room/modify/{room.id}"><button type="submit" name="edit" value="{room.id}">Edit</button></a></td>
+                <td><a href="/room/delete/{room.id}"><button type="submit" name="delete" value="{room.id}">Delete</button></a></td>
+                <td><a href="/room/reserve/{room.id}"><button type="submit" name="book" value="{room.id}">Book</button></a></td></tr>
+                """)
         all_rooms.write('</table>')
 
         if rooms.count() == 0:
@@ -139,6 +140,7 @@ class EditRoom(View):
             return redirect('/rooms')
         return HttpResponse(warn)
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class DelRoom(View):
     def get(self, request, id):
@@ -146,26 +148,26 @@ class DelRoom(View):
         room.delete()
         return redirect('/rooms')
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class BookRoom(View):
     today = date.today()
-    def get(self, request, id):
 
-        print(id)
-        # min = "{today}"
+    def get(self, request, id):
+        room = Rooms.objects.get(pk=id)
         response = f"""
         <form action="" method="POST">
                         <label>
-                            Reservation date: <input type="date" name="book_date" value="{self.today}" />
-                            
-                        </la.strftime("%d/%m/%y")bel><br>
+                            Reservation date: <input type="date" name="book_date" value="{self.today}" min = "{self.today}"/>
+                        </label><br>
                         <label>
                             Comment field: <input type="text" name="comment"/>
                         </label><br>
                         <br>
-                        <input type="submit" value="Book the Room">
-                    </form>"""
-
+                        <table><td>"""
+        for booked in room.booking_set.all().order_by('date'):
+            response += f'<tr><td>{booked.date}</td><td>{booked.comment}</tr>'
+        response += '</td></table></tr><br><br><input type="submit" value="Book the Room"></form>'
         return HttpResponse(response)
 
     def post(self, request, id):
@@ -188,3 +190,27 @@ class BookRoom(View):
         else:
             Booking.objects.create(date=date, comment=comment, room=conf_room)
             return redirect('/rooms')
+
+
+class RoomDtl(View):
+    def get(self, request, id):
+        room = Rooms.objects.get(pk=id)
+
+        room_dtl = HttpResponse(f"""
+                <table><tr><th>Room</th><th>Capacity</th><th>Available</th><th>Projector</th><th>Booked</th></tr>
+                <tr><td>{room.name}</td><td>{room.capacity}</td><td>{"No" if room.booking_set.filter(date=date.today()) else "Yes"}</td><td>{room.projector}</td><td>
+                <table>
+                """)
+        for booked in room.booking_set.all().order_by('date'):
+            if booked.date >= date.today():
+                room_dtl.write(f'<tr><td>{booked.date}</td><td>{booked.comment}</tr>')
+
+        room_dtl.write('</td></table></tr></table><br><br>')
+        room_dtl.write(f"""<a href="/room/modify/{id}">Edit Room</a>
+                            <a href="/room/delete/{id}">Delete Room</a>
+                            <a href="/room/reserve/{id}">Book Room</a><br><br>
+                            
+                            <a href="/rooms">All Rooms</a><br><br>
+        """)
+
+        return room_dtl
