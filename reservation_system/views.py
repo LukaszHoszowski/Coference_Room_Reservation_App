@@ -69,7 +69,7 @@ class AllRooms(View):
                 f"""<tr><td><a href="/room/{room.id}">{room.name}</a></td>
                 <td>{room.capacity}</td>
                 <td>{"No" if room.booking_set.filter(date=date.today()) else "Yes"}</td>
-                <td>{room.projector}</td>
+                <td>{"Yes" if room.projector else "No"}</td>
                 <td><a href="/room/modify/{room.id}"><button type="submit" name="edit" value="{room.id}">Edit</button></a></td>
                 <td><a href="/room/delete/{room.id}"><button type="submit" name="delete" value="{room.id}">Delete</button></a></td>
                 <td><a href="/room/reserve/{room.id}"><button type="submit" name="book" value="{room.id}">Book</button></a></td></tr>
@@ -209,8 +209,46 @@ class RoomDtl(View):
         room_dtl.write(f"""<a href="/room/modify/{id}">Edit Room</a>
                             <a href="/room/delete/{id}">Delete Room</a>
                             <a href="/room/reserve/{id}">Book Room</a><br><br>
-                            
                             <a href="/rooms">All Rooms</a><br><br>
         """)
-
         return room_dtl
+
+class Main(View):
+    def get(self, request):
+        response = HttpResponse("""
+                    <form action="/search/" method="GET">
+                        <label>
+                            Room name: <input type="text" name="name"/>
+                        </label><br>
+                        <label>
+                            Min room capacity: <input type="number" name="min_capacity"/>
+                        </label><br>
+                        <label>
+                            Project present?: <input type="checkbox" value=1 name="projector"/>
+                        </label> <br>
+                        <br>
+                        <input type="submit" value="Find the Room">
+                    </form>
+                """)
+        return response
+
+class Search(View):
+    today = date.today()
+    def get(self, request):
+        name = request.GET.get('name')
+        min_capacity = request.GET.get('min_capacity')
+        min_capacity = 0 if not min_capacity else min_capacity
+        projector = True if request.GET.get('projector') else False
+
+        q_rooms = Rooms.objects.filter(name__icontains=name, capacity__gt=min_capacity, projector=projector).exclude(booking__date=self.today)
+
+        if q_rooms:
+            response = HttpResponse("""<table><tr><th>Room Name:</th><th>Capacity:</th><th>Projector:</th></tr>""")
+            for q in q_rooms:
+                response.write(f'<tr><td>{q.name}</td><td>{q.capacity}</td><td>{q.projector}</td></tr>')
+            response.write('</table>')
+        else:
+            response = HttpResponse('No rooms available for the search!')
+
+        response.write(f'<br><br><a href="/">Go back to SEARCH</a>')
+        return HttpResponse(response)

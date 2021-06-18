@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from reservation_system.views import AddRoom, AllRooms, EditRoom, DelRoom, BookRoom, RoomDtl
+from reservation_system.views import AddRoom, AllRooms, EditRoom, DelRoom, BookRoom, RoomDtl, Main, Search
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,4 +26,6 @@ urlpatterns = [
     path('room/reserve/<int:id>', BookRoom.as_view()),
     path('room/<int:id>', RoomDtl.as_view()),
     path('rooms/', AllRooms.as_view()),
+    path('', Main.as_view()),
+    path('search/', Search.as_view())
 ]
