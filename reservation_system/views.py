@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.template.response import TemplateResponse
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -53,8 +54,26 @@ class AddRoom(View):
             Rooms.objects.create(name=name.title(), capacity=capacity, projector=projector)
             warn += "<br>Your Room has been saved to DB!"
         return redirect('/rooms')
-        # return HttpResponse(warn)
 
+class AddRoom2(View):
+    def get(self, request):
+        return render(request, "add_room.html")
+
+    def post(self, request):
+        name = request.POST.get('name')
+        capacity = request.POST.get('capacity')
+        capacity = int(capacity) if capacity else 0
+        projector = request.POST.get('projector') == 0
+
+        if not name:
+            return render(request, "add_room.html", context={"error": "Room name hasn't been entered"})
+        if capacity <= 0:
+            return render(request, "add_room.html", context={"error": "Capacity needs to be positive"})
+        if Rooms.objects.filter(name=name.title()).first():
+            return render(request, "add_room.html", context={"error": "Such room already exist"})
+
+        Rooms.objects.create(name=name.title(), capacity=capacity, projector=projector)
+        return redirect('room-list')
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AllRooms(View):
@@ -81,9 +100,14 @@ class AllRooms(View):
 
         return all_rooms
 
-    # def post(self, request):
-    #     pass
 
+class AllRooms2(View):
+    def get(self, request):
+        rooms = Rooms.objects.all()
+        for room in rooms:
+            reservation_dates = [reservation.date for reservation in room.booking_set.all()]
+            room.reserved = date.today() in reservation_dates
+        return render(request, "rooms.html", context={"rooms": rooms})
 
 @method_decorator(csrf_exempt, name='dispatch')
 class EditRoom(View):
@@ -140,6 +164,33 @@ class EditRoom(View):
             return redirect('/rooms')
         return HttpResponse(warn)
 
+class EditRoom2(View):
+    def get(self, request, id):
+        room = Rooms.objects.get(id=id)
+        return render(request, "modify_room.html", context={"room": room})
+
+    def post(self, request, id):
+        room = Rooms.objects.get(id=id)
+        name = request.POST.get("name")
+        capacity = request.POST.get("capacity")
+        capacity = int(capacity) if capacity else 0
+        projector = request.POST.get("projector") == "on"
+
+        if not name:
+            return render(request, "modify_room.html", context={"room": room, "error": "Room name hasn't been entered"})
+        if capacity <= 0:
+            return render(request, "modify_room.html", context={"room": room, "error": "Capacity needs to be positive"})
+        if name != room.name and Rooms.objects.filter(name=name.title()).first():
+            return render(request, "modify_room.html", context={"room": room, "error": "Such room already exist"})
+
+        room.name = name
+        room.capacity = capacity
+        room.projector = projector
+        room.save()
+
+        return redirect("room-list")
+
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class DelRoom(View):
@@ -147,6 +198,12 @@ class DelRoom(View):
         room = Rooms.objects.get(pk=id)
         room.delete()
         return redirect('/rooms')
+
+class DelRoom2(View):
+    def get(self, request, id):
+        room = Rooms.objects.get(pk=id)
+        room.delete()
+        return redirect('room-list')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -192,6 +249,35 @@ class BookRoom(View):
             return redirect('/rooms')
 
 
+class BookRoom2(View):
+    today = str(date.today())
+
+    def get(self, request, id):
+        room = Rooms.objects.get(pk=id)
+        reservations = room.booking_set.filter(date__gte=str(self.today)).order_by('date')
+        return render(request, "reservation.html", context={"room": room,
+                                                            "reservations": reservations})
+
+    def post(self, request, id):
+        date = request.POST.get('date')
+        comment = request.POST.get('comment')
+        room = Rooms.objects.get(id=id)
+
+        reservations = room.booking_set.filter(date__gte=str(datetime.date.today())).order_by('date')
+
+        if Booking.objects.filter(room=room, date=date):
+            return render(request, "reservation.html", context={"room": room,
+                                                                "reservations": reservations,
+                                                                "error": "Room already booked!"})
+        if date < str(self.today):
+            return render(request, "reservation.html", context={"room": room,
+                                                                "reservations": reservations,
+                                                                "error": "Only current/future dates are allowed!"})
+
+        Booking.objects.create(room=room, date=date, comment=comment)
+        return redirect("room-list")
+
+
 class RoomDtl(View):
     def get(self, request, id):
         room = Rooms.objects.get(pk=id)
@@ -212,6 +298,12 @@ class RoomDtl(View):
                             <a href="/rooms">All Rooms</a><br><br>
         """)
         return room_dtl
+
+class RoomDtl2(View):
+    def get(self, request, id):
+        room = Rooms.objects.get(pk=id)
+        reservations = room.booking_set.filter(date__gte=str(date.today())).order_by('date')
+        return render(request, "room_details.html", context={"room": room, "reservations": reservations})
 
 class Main(View):
     def get(self, request):
@@ -252,3 +344,23 @@ class Search(View):
 
         response.write(f'<br><br><a href="/">Go back to SEARCH</a>')
         return HttpResponse(response)
+
+class Search2(View):
+    def get(self, request):
+        name = request.GET.get("name")
+        capacity = request.GET.get("capacity")
+        capacity = int(capacity) if capacity else 0
+        projector = request.GET.get("projector") == "on"
+
+        rooms = Rooms.objects.all()
+        if projector:
+            rooms = rooms.filter(projector=projector)
+        if capacity:
+            rooms = rooms.filter(capacity__gte=capacity)
+        if name:
+            rooms = rooms.filter(name__icontains=name)
+
+        for room in rooms:
+            reservation_dates = [reservation.date for reservation in room.booking_set.all()]
+            room.reserved = str(date.today()) in reservation_dates
+        return render(request, "rooms.html", context={"rooms": rooms, "date": date.today()})

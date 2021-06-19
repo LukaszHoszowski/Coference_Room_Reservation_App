@@ -16,16 +16,35 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from reservation_system.views import AddRoom, AllRooms, EditRoom, DelRoom, BookRoom, RoomDtl, Main, Search
+from egzamin_probny.views import Start, Lecture
+from reservation_system.views import AddRoom, AllRooms, EditRoom, DelRoom, BookRoom, RoomDtl, Main, Search, AddRoom2, \
+    AllRooms2, DelRoom2, EditRoom2, BookRoom2, RoomDtl2, Search2
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('room/add/', AddRoom.as_view()),
+    path('room/add2/', AddRoom2.as_view(), name="add-room"),
+
     path('room/modify/<int:id>', EditRoom.as_view()),
+    path('room/modify2/<int:id>/', EditRoom2.as_view(), name="edit-room"),
+
     path('room/delete/<int:id>', DelRoom.as_view()),
+    path('room/delete2/<int:id>/', DelRoom2.as_view(), name="delete-room"),
+
     path('room/reserve/<int:id>', BookRoom.as_view()),
+    path('room/reserve2/<int:id>/', BookRoom2.as_view(), name="reserver-room"),
+
     path('room/<int:id>', RoomDtl.as_view()),
+    path('room2/<int:id>/', RoomDtl2.as_view(), name="room"),
+
     path('rooms/', AllRooms.as_view()),
+    path('rooms2/', AllRooms2.as_view(), name="room-list"),
+
     path('', Main.as_view()),
-    path('search/', Search.as_view())
+
+    path('search/', Search.as_view()),
+    path('search2/', Search2.as_view(), name="room-search"),
+
+    path('start/', Start.as_view()),
+    path('lecture/<int:id>', Lecture.as_view())
 ]

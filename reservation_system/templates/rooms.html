@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Room App - All Rooms{% endblock %}
+
+{% block content %}
+<!-- table -->
+
+<table class="table">
+    <thead>
+    <tr class="d-flex">
+        <th scope="col" class="col-1">#</th>
+        <th scope="col" class="col-2">Name</th>
+        <th scope="col" class="col-1">Capacity</th>
+        <th scope="col" class="col-1">Availability</th>
+        <th scope="col" class="col-5" colspan="4">Projector?</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for room in rooms %}
+    <tr class="d-flex">
+        <th scope="row" class="col-1">{{ room.id }}</th>
+        <td class="col-2">
+            <a href="/room/{{ room.id }}/">{{ room.name }}</a>
+        </td>
+        <td class="col-1">{{ room.capacity }}</td>
+        {% if room.reserved %}
+        <td class="col-2" style="color:red;">Booked</td>
+        {% else %}
+        <td class="col-2" style="color:green;">Available</td>
+        {% endif %}
+        {% if room.projector %}
+        <td class="col-2" style="color:green;">&#9745;</td>
+        {% else %}
+        <td class="col-2" style="color:red;">&#9746;</td>
+        {% endif %}
+        <td class="col-1">
+            <a href="/room/modify2/{{ room.id }}/">Edit</a>
+        </td>
+        <td class="col-1">
+            <a href="/room/delete2/{{ room.id }}/">Delete</a>
+        </td>
+        <td class="col-1">
+            <a href="/room/reserve2/{{ room.id }}/">Book</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">Lack of available rooms</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<!-- table -->
+<br>
+<!-- Form -->
+<h3>Search</h3>
+<div class="card">
+  <div class="card-body">
+    <form action="/search2" method="GET">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="name">Room name</label>
+        <input type="text" class="form-control" id="name" aria-describedby="room-name-help" placeholder="Room name" name="name">
+      </div>
+      <div class="form-group">
+        <label for="capacity">Min capacity</label>
+        <input type="number" step="1" class="form-control" id="capacity" placeholder="10" name="capacity">
+      </div>
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="projector" id="projector">
+        <label class="form-check-label" for="projector">Projector?</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+  </div>
+</div>
+
+<!-- Form -->
+
+
+{% endblock %}
