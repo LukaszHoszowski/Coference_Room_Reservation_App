@@ -24,7 +24,7 @@ class AddRoom(View):
                 </label><br>
                 <label>
                     Project present?: <input type="checkbox" value=1 name="projector"/>
-                </label> <br>
+                </label><br>
                 <br>
                 <input type="submit" value="Save the Room">
             </form>
@@ -41,19 +41,21 @@ class AddRoom(View):
         else:
             projector = True
 
-        warn = ""
+        warn = HttpResponse("")
 
         if not name:
-            warn += ("You need to enter Room's name!<br>")
+            warn.write ("You need to enter Room's name!<br>")
         if Rooms.objects.filter(name=name.title()).exists():
-            warn += ("Such Room already exist! Change name of the room!<br>")
+            warn.write ("Such Room already exist! Change name of the room!<br>")
         if int(capacity) <= 0:
-            warn += ("We won't kill anyone to fulfill your sick requirments, room can't be empty!<br>")
+            warn.write ("We won't kill anyone to fulfill your sick requirments, room can't be empty!<br>")
 
         if warn == "":
             Rooms.objects.create(name=name.title(), capacity=capacity, projector=projector)
-            warn += "<br>Your Room has been saved to DB!"
-        return redirect('/rooms')
+            warn.write ("<br>Your Room has been saved to DB!")
+            return redirect('/rooms')
+        else:
+            return warn
 
 class AddRoom2(View):
     def get(self, request):

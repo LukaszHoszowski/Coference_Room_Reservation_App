@@ -11,7 +11,7 @@ class Rooms(models.Model):
 class Booking(models.Model):
     date = models.DateField()
     room = models.ForeignKey('Rooms', models.CASCADE)
-    comment = models.TextField()
+    comment = models.TextField(null=True)
 
     class Meta:
-        unique_together = ('date', 'room_id')
+        unique_together = ('date', 'room')
